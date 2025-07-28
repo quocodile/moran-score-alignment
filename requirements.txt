@@ -1,0 +1,10 @@
+numpy
+anndata
+packaging
+wheel
+numba
+scanpy
+tables
+paste-bio
+Cython
+POT
