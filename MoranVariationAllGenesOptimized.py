@@ -18,7 +18,7 @@ def apply_rbf_to_tensor(dist_matrix):
   unnormalized_w = torch.exp(unnormalized_w) 
   return unnormalized_w
 
-def get_spatial_weight_matrix(stereo_spots, reconstructed_spots, dist_matrix, top_expressed_spots):
+def get_spatial_weight_matrix(stereo_spots, reconstructed_spots, dist_matrix):
   w_matrix = apply_rbf_to_tensor(dist_matrix)
   #w_sum = torch.sum(w_matrix)
   # Element-wise normalization 
@@ -61,17 +61,26 @@ if __name__ == "__main__":
   filename1 = sys.argv[1]
   filename2 = sys.argv[2]
 
+  slice1 = align.load_slice(filename1)
+  slice2 = align.load_slice(filename2)
+
+  gene = 'magi1b'
+  slice1_gene = slice1[:, gene] 
+  slice2_gene = slice2[:, gene] 
+  slice1_spots = slice1_gene.obsm['spatial']
+  slice2_spots = slice2_gene.obsm['spatial']
+
   # Get the distance matrix
-  d = get_distance_matrix(stereo_spots, reconstructed_spots)
+  d = get_distance_matrix(slice1_spots, slice2_spots)
   
   # Get the unnormalized spatial weight matrix
-  w = get_spatial_weight_matrix(stereo_spots, reconstructed_spots, dist_matrix)
+  w = get_spatial_weight_matrix(slice1_spots, slice2_spots, d)
       
   # Match the number of non-zero spots
-  stereo_ratio_nonzero = np.count_nonzero(slices[0][:, gene].X) / len(slices[0][:,gene].X) * 2 
+  stereo_ratio_nonzero = np.count_nonzero(slice1_gene.X) / len(slice1_gene.X) * 2 
   rec_spatial = []
   rec_expression = []
-  for data in reconstructed_slice_gene:
+  for data in slice2_gene:
     rec_spatial.append(data.obsm['spatial'][0])
     rec_expression.append(data.X.flatten()[0])
 
@@ -81,13 +90,15 @@ if __name__ == "__main__":
   top_expressed_spots = np.array(rec_spatial)[rec_sort_indices]
        
   # Filter entries of the w matrix to only top-expressed spots
-  for i in range(w_matrix.shape[1]):
+  for i in range(w.shape[1]):
     if i not in rec_sort_indices:
-      w_matrix[:,i] = 0
+      w[:,i] = 0
 
   # Normalize the w matrix
-  w_sum = np.sum(w_matrix)
-  w_matrix = w_matrix * (w_matrix.shape[0] / w_sum)
+  print(type(w))
+  w_sum = torch.sum(w)
+  #w_matrix = w * (w.shape[0] / w_sum)
         
-  global_moran_score = global_moran_score(w, stereoseq_slice_gene, reconstructed_slice_gene)
+  global_moran_score = global_moran_score(w.numpy(), slice1_gene, slice2_gene)
+  print(global_moran_score)
 
