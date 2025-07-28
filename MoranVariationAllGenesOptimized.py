@@ -57,6 +57,10 @@ if __name__ == "__main__":
   # 1. h5ad file for slice 1
   # 2. h5ad file for slice 2
 
+  print(sys.argv)
+  filename1 = sys.argv[1]
+  filename2 = sys.argv[2]
+
   # Get the distance matrix
   d = get_distance_matrix(stereo_spots, reconstructed_spots)
   
