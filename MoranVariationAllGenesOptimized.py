@@ -57,14 +57,24 @@ if __name__ == "__main__":
   # 1. h5ad file for slice 1
   # 2. h5ad file for slice 2
 
-  print(sys.argv)
+  if len(sys.argv) == 1:
+    print("-----")
+    print("How to invoke the command:")
+    print("python3 MoranVariationAllGenesOptimized.py <h5ad_1> <h5ad_2>")
+    print("-----")
+    quit()
+
   filename1 = sys.argv[1]
   filename2 = sys.argv[2]
 
-  slice1 = align.load_slice(filename1)
-  slice2 = align.load_slice(filename2)
+  #slice1 = align.load_slice(filename1)
+  #slice2 = align.load_reconstructed_slice(filename2, )
 
-  gene = 'magi1b'
+  # At this point, assuming slices aligned with PASTE
+  slice1 = sc.read_h5ad(filename1)
+  slice2 = sc.read_h5ad(filename2)
+
+  gene = 'gsc'
   slice1_gene = slice1[:, gene] 
   slice2_gene = slice2[:, gene] 
   slice1_spots = slice1_gene.obsm['spatial']
@@ -85,8 +95,7 @@ if __name__ == "__main__":
     rec_expression.append(data.X.flatten()[0])
 
   # Choosing which spots to consider from the reconstructed data
-  rec_sort_indices = np.argsort(rec_expression)[::-1][:int(stereo_ratio_nonzero * len(rec_spatial))]
-  #rec_sort_indices = np.argsort(rec_expression)[::-1]
+  rec_sort_indices = np.argsort(rec_expression)[::-1]
   top_expressed_spots = np.array(rec_spatial)[rec_sort_indices]
        
   # Filter entries of the w matrix to only top-expressed spots
@@ -95,10 +104,10 @@ if __name__ == "__main__":
       w[:,i] = 0
 
   # Normalize the w matrix
-  print(type(w))
   w_sum = torch.sum(w)
-  #w_matrix = w * (w.shape[0] / w_sum)
+  w_matrix = w * (w.shape[0] / w_sum)
+  w_matrix = w_matrix.numpy()
         
-  global_moran_score = global_moran_score(w.numpy(), slice1_gene, slice2_gene)
+  global_moran_score = global_moran_score(w_matrix, slice1_gene, slice2_gene)
   print(global_moran_score)
 
