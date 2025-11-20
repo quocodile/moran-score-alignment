@@ -2,24 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import align
 import paste as pst
-import colorcet as cc
-
-print
 
 def normalize_gene_expression(expression):
   return expression / np.linalg.norm(expression)
 
 def load_ctfactomo_slice(stereo_slice_num, reconstructed_slice_num):
-  return align.load_reconstructed_slice(f"reconstructed_zfish_shield/ctfactomo_zfish_shield_genes_matched_with_stereoseq_slice_{reconstructed_slice_num}.npy", [stereo_slice_num], reconstructed_slice_num)
+  return align.load_reconstructed_slice(f"reconstructed_zfish_slices/ctfactomo_zfish_shield_genes_matched_with_stereoseq_slice_{reconstructed_slice_num}.npy", [stereo_slice_num], reconstructed_slice_num)
 
 def load_ipf_slice(stereo_slice_num, reconstructed_slice_num):
-  return align.load_reconstructed_slice(f"reconstructed_zfish_shield/ipf_zfish_shield_genes_matched_with_stereoseq_slice_{reconstructed_slice_num}.npy", [stereo_slice_num], reconstructed_slice_num)
+  return align.load_reconstructed_slice(f"reconstructed_zfish_slices/ipf_zfish_shield_genes_matched_with_stereoseq_slice_{reconstructed_slice_num}.npy", [stereo_slice_num], reconstructed_slice_num)
 
 h5ad_file = 'zfish_subset_stereoseq.h5ad' # data filepath 
 
 # Select the configuration 
 gene = 'gsc'
-reconstructed_slice_number = 32 
+reconstructed_slice_number = 31 
 stereo_slice_number = 2 
 #reconstruction_type = 'IPF'
 reconstruction_type = 'CTFacTomo'
@@ -62,18 +59,30 @@ rec_nonzero_y = []
 rec_zero_x = []
 rec_zero_y = []
 all_vals = []
-for i, r, in enumerate(stereoseq_slice):
+for i, r, in enumerate(reconstructed_slice):
   p = r.obsm['spatial']
   rec_x.append(p[0][0])
   rec_y.append(p[0][1])
-  rec_val.append(r.X.flatten()[0])
+  #rec_val.append(r.X.flatten()[0])
   all_vals.append(r.X.flatten()[0])
-  if r.X.flatten()[0] == 0:
+  if r.X.flatten()[0] < 0.0001:
     rec_zero_x.append(p[0][0])
     rec_zero_y.append(p[0][1])
   else:
+    rec_val.append(r.X.flatten()[0])
     rec_nonzero_x.append(p[0][0])
     rec_nonzero_y.append(p[0][1])
+ 
+# Experimenting by picking tops spots that cover % of expression.
+total_expression = np.sum(all_vals)
+
+sorted_vals = sorted(all_vals, reverse=True)
+cutoff_expression = 0.50
+cutoff_expression_idx = 10000000000000000000000
+for i in range(len(all_vals)):
+  if np.sum(sorted_vals[:i]) / total_expression >= cutoff_expression:
+    cutoff_expression_idx = i
+    break
 
 # Selecting the top spots to visualize
 stereo_ratio_nonzero = np.count_nonzero(slices[0][:, gene].X) / len(slices[0][:,gene].X) * 2 

@@ -7,8 +7,8 @@ from scipy.stats import pearsonr
 import sys
 
 # Load Slices
-# h5ad_file = 'zfish_subset_stereoseq.h5ad' # change this path to the data you wish to analyze
-# mask_file = 'zebrafish_mask.npy'
+h5ad_file = 'zfish_subset_stereoseq.h5ad' # change this path to the data you wish to analyze
+mask_file = 'zebrafish_mask.npy'
 
 def normalize_gene_expression(expression):
   return expression / np.linalg.norm(expression)
@@ -19,6 +19,7 @@ def load_slice(h5ad_file, slice_name=None):
       cur_slice = data[data.obs["slice"] == slice_name] 
     else:
       cur_slice = data
+    print(cur_slice.obs)
     slice_x = cur_slice.obs["spatial_x"] 
     slice_y = cur_slice.obs["spatial_y"] 
     spatial = []
@@ -26,6 +27,25 @@ def load_slice(h5ad_file, slice_name=None):
       spatial.append([slice_x[i], slice_y[i]]) 
     cur_slice.obsm['spatial'] = np.array(spatial) 
     return cur_slice 
+
+def load_slices(h5ad_file, slice_names=None):
+    data = sc.read_h5ad(h5ad_file)
+    slices = []
+    for slice_name in slice_names:
+        slice_i = data[data.obs["slice"] == slice_name]
+        slice_i_x = slice_i.obs["spatial_x"]
+        slice_i_y = slice_i.obs["spatial_y"]
+        spatial = []
+        for i in range(len(slice_i_x)):
+          spatial.append([slice_i_x[i], slice_i_y[i]])
+        slice_i.obsm['spatial'] = np.array(spatial)
+
+
+        # Preprocess slices
+        # sc.pp.filter_genes(slice_i, min_counts = 15)
+        # sc.pp.filter_cells(slice_i, min_counts = 100)
+        slices.append(slice_i)
+    return slices
 
 def get_min_spatial_bounds(h5ad_file, slice_names):
     data = sc.read_h5ad(h5ad_file)
