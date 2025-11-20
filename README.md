@@ -11,7 +11,10 @@ Probably AnnData
 An AnnData object that has a 'spatial' attribute specifying  X,Y coordinates
 The slices should have already been aligned by PASTE.
 
-# Generate a Moran Score for PASTE-aligned slices
+## Generate a Moran Score for PASTE-aligned slices
 
+invoke the following command:
 
-# Visualize slices and top-contributing spots
+python3 MoranVariationAllGenesOptimized
+
+## Visualize slices and top-contributing spots
