@@ -15,11 +15,15 @@ The slices should have already been aligned by PASTE.
 
 invoke the following command:
 
+```
 python3 MoranScore.py <h5ad_filename1> <h5ad_filename2> <gene_name>
+```
 
 ## Visualize slices and top-contributing spots
 
+```
 python3 VisAlignedSlices.py <gene_name> <reconstructed_slice> <stereoseq_slice> <reconstruction_mode> 
+```
 
 For the slices of the gene 'gsc' that we previously generated a MoranScore for, you should get something like this.
 
