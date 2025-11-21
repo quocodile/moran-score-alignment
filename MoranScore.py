@@ -60,12 +60,13 @@ if __name__ == "__main__":
   if len(sys.argv) == 1:
     print("-----")
     print("How to invoke the command:")
-    print("python3 MoranVariationAllGenesOptimized.py <h5ad_1> <h5ad_2>")
+    print("python3 MoranScore.py <h5ad_filename1> <h5ad_filename2> <gene_name>")
     print("-----")
     quit()
 
   filename1 = sys.argv[1]
   filename2 = sys.argv[2]
+  gene = sys.argv[3]
 
   #slice1 = align.load_slice(filename1)
   #slice2 = align.load_reconstructed_slice(filename2, )
@@ -74,7 +75,6 @@ if __name__ == "__main__":
   slice1 = sc.read_h5ad(filename1)
   slice2 = sc.read_h5ad(filename2)
 
-  gene = 'gsc'
   slice1_gene = slice1[:, gene] 
   slice2_gene = slice2[:, gene] 
   slice1_spots = slice1_gene.obsm['spatial']
