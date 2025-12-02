@@ -186,8 +186,8 @@ print(len(ctf_scores))
 print(avg_ctf)
 print(avg_ipf)
 
+# Get a p-value for CTFacTomo and IPF means
 diff = np.array(ctf_scores) - np.array(ipf_scores) 
-
 print("T-test:", stats.ttest_1samp(diff, 0))
 
 plt.scatter(ctf_scores, ipf_scores, s=4, cmap='viridis')
@@ -195,6 +195,7 @@ for i, s1  in enumerate(ctf_scores):
   for j, s2 in enumerate(ipf_scores):
     if i == j:
       plt.text(s1, s2, gene_names[i], fontsize=2, color='black')
+
 plt.plot([-0.1, 0.5], [-0.1, 0.5], 'k--', linewidth=0.5)
 plt.xlim(-0.1,0.5)
 plt.ylim(-0.1,0.5)
